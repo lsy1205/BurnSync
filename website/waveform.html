@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IMU Data Display</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    #data {
+      font-size: 18px;
+      color: #333;
+      margin-top: 20px;
+    }
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    /* 新增一个容器用于并排显示两个图表 */
+    .chart-container {
+      display: flex;
+      justify-content: center;
+      gap: 100px; /* 图表间距 */
+      margin-top: 20px;
+    }
+    /* 设置 canvas 尺寸 */
+    .chart-container canvas {
+      max-width: 700px;
+      max-height: 750px;
+    }
+  </style>
+</head>
+<body>
+  <h1>IMU Data Display</h1>
+  <button onclick="connectToBLE()">Connect to BLE Device</button>
+  <div id="data">Waiting for data...</div>
+
+  <!-- 图表容器，包含两个并列的图表 -->
+  <div class="chart-container">
+    <!-- 加速度图表 -->
+    <canvas id="accelChart"></canvas>
+    <!-- 角速度图表 -->
+    <canvas id="gyroChart"></canvas>
+  </div>
+
+  <!-- 引入 Chart.js 库 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    let accelChart, gyroChart;
+
+    async function connectToBLE() {
+      try {
+        const device = await navigator.bluetooth.requestDevice({
+          acceptAllDevices: true,
+          optionalServices: ['12345678-1234-1234-1234-123456789abc'] // 使用你的服务 UUID
+        });
+
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService('12345678-1234-1234-1234-123456789abc'); // 使用你的服务 UUID
+        const characteristic = await service.getCharacteristic('87654321-4321-4321-4321-abcde1234567'); // 使用你的特征 UUID
+
+        characteristic.addEventListener('characteristicvaluechanged', (event) => {
+          const data = event.target.value;
+          const accelX = data.getFloat32(0, true);
+          const accelY = data.getFloat32(4, true);
+          const accelZ = data.getFloat32(8, true);
+          const gyroX = data.getFloat32(12, true);
+          const gyroY = data.getFloat32(16, true);
+          const gyroZ = data.getFloat32(20, true);
+
+          document.getElementById('data').innerText = 
+            `Acceleration: X=${accelX.toFixed(2)}, Y=${accelY.toFixed(2)}, Z=${accelZ.toFixed(2)}\n` +
+            `Gyroscope: X=${gyroX.toFixed(2)}, Y=${gyroY.toFixed(2)}, Z=${gyroZ.toFixed(2)}`;
+
+          updateChart(accelChart, [accelX, accelY, accelZ]);
+          updateChart(gyroChart, [gyroX, gyroY, gyroZ]);
+        });
+
+        await characteristic.startNotifications();
+        document.getElementById('data').innerText = "Connected and listening for data...";
+
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('data').innerText = "Error: " + error;
+      }
+    }
+
+    function setupCharts() {
+      const accelCtx = document.getElementById('accelChart').getContext('2d');
+      const gyroCtx = document.getElementById('gyroChart').getContext('2d');
+
+      accelChart = new Chart(accelCtx, {
+        type: 'line',
+        data: {
+          labels: Array(50).fill(''), // 初始 x 轴标签
+          datasets: [
+            { label: 'Accel X', borderColor: 'red', data: [] },
+            { label: 'Accel Y', borderColor: 'green', data: [] },
+            { label: 'Accel Z', borderColor: 'blue', data: [] }
+          ]
+        },
+        options: {
+          animation: false,
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      gyroChart = new Chart(gyroCtx, {
+        type: 'line',
+        data: {
+          labels: Array(50).fill(''), // 初始 x 轴标签
+          datasets: [
+            { label: 'Gyro X', borderColor: 'orange', data: [] },
+            { label: 'Gyro Y', borderColor: 'purple', data: [] },
+            { label: 'Gyro Z', borderColor: 'brown', data: [] }
+          ]
+        },
+        options: {
+          animation: false,
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    function updateChart(chart, data) {
+      chart.data.datasets.forEach((dataset, index) => {
+        dataset.data.push(data[index]);
+        if (dataset.data.length > 50) {
+          dataset.data.shift(); // 保持数据长度不超过 50
+        }
+      });
+      chart.update();
+    }
+
+    // 初始化图表
+    setupCharts();
+  </script>
+</body>
+</html>
