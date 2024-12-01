@@ -33,10 +33,10 @@ def play_sound():
 async def toggle_start_flag():
     global start_flag
     while True:
+        play_sound()  # 每次 start_flag 增加時播放音效
+        print(f"Start Flag: {start_flag}")
         await asyncio.sleep(3)
         start_flag += 1
-        print(f"Start Flag: {start_flag}")
-        play_sound()  # 每次 start_flag 增加時播放音效
 
 async def run():
     print("Scanning for device...")
