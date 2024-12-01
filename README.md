@@ -17,5 +17,3 @@ III. Website, Language model, 心律sensor
 
 IV. edge model (addition)
 再說  
-
-test
