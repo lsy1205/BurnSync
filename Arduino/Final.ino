@@ -1,6 +1,5 @@
 #include <ArduinoBLE.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SH110X.h>
+#include <ACROBOTIC_SSD1306.h>
 #include "Arduino_BMI270_BMM150.h"
 #include <Wire.h>
 
@@ -28,6 +27,17 @@ void setup() {
   if (Serial) {
     Serial.println("Started");
   }
+  Wire.begin();	
+  oled.init();                      // Initialze SSD1306 OLED display
+  oled.clearDisplay();              // Clear screen
+  oled.setTextXY(0,0);
+  oled.putString("BurnSync");
+  oled.setTextXY(2,0);
+  oled.putString("Fitness Tracker");
+  oled.setTextXY(4,0);
+  oled.putString("Status: ");
+  oled.setTextXY(5,0);
+  oled.putString("Disconnected");
   
   // Pin Mode
   pinMode(recordPin, INPUT_PULLUP);
@@ -69,7 +79,10 @@ void loop() {
       Serial.print("Connected to central: ");
       Serial.println(central.address());
     }
-
+    if (central.connected()) {
+        oled.setTextXY(5,0);
+        oled.putString("Connected   ");
+    }
     while (central.connected()) {
         currentMillis = millis();
         if (currentMillis - previousMillisBLE >= intervalBLE) {
@@ -120,6 +133,8 @@ void loop() {
         }
         preButtonRecord = buttonRecord;
     }
+    oled.setTextXY(5,0);
+    oled.putString("Disconnected");
 
     if (Serial) {
       Serial.println("Disconnected from central");
