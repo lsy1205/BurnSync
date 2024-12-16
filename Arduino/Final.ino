@@ -11,18 +11,12 @@ const long intervalBLE = 100;
 
 // Define Pins
 int recordPin = D3;
-int blePin = D13;
-int groundPin = A0;
 
 // Define Buttons
 bool buttonRecord = true;
 bool preButtonRecord = true;
 
-bool buttonBLE = true;
-bool preButtonBLE = true;
-
 // Define BLE and UUID
-int channel = 0;
 BLEService imuService("12345678-1234-1234-1234-123456789abc"); // Define UUID
 BLECharacteristic imuCharacteristic("87654321-4321-4321-4321-abcde1234567", BLERead | BLEWrite | BLENotify, 512); // 24 字节用于发送 6 个浮点数
 
@@ -38,12 +32,6 @@ void setup() {
   // Pin Mode
   pinMode(recordPin, INPUT_PULLUP);
   digitalWrite(recordPin, HIGH);
-
-  pinMode(blePin, INPUT_PULLUP);
-  digitalWrite(blePin, HIGH);
-
-  pinMode(groundPin, OUTPUT);
-  digitalWrite(groundPin, LOW);
 
   // 初始化 BLE
   if (!BLE.begin()) {
@@ -75,18 +63,6 @@ void setup() {
 
 void loop() {
   BLEDevice central = BLE.central();
-
-  // BLE Button
-  buttonBLE = digitalRead(blePin);
-  
-  // if(Serial){
-  //     Serial.println(buttonBLE);
-  // }
-  if (buttonBLE == 1 && preButtonBLE == 0) {
-      // add channel
-      channel = (channel + 1) % 4;
-  }
-  preButtonBLE = buttonBLE;
 
   if (central) {
     if (Serial) {
