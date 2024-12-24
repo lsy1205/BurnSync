@@ -1,0 +1,18 @@
+LSTM =>        valid acc: 0.9958333333333333    test_acc: 0.9875
+Attn_conv =>   valid acc: 1.0                   test_acc: 1.0
+
+
+
+Test acc: 100
+
+User1:
+left:98.75
+right:98.75
+high:100
+low:95
+
+User2:
+left:100
+right:100
+high:100
+low:100
