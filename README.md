@@ -52,4 +52,5 @@ https://github.com/lsy1205/BurnSync_website.git)
 * Python: the python code to collect data, this folder will only be used when you want to collect your own data and train your own model
 * Website: a simple html you can try with your own
 * Slides: our presentation slides, you can also find demo videos in the slides
+* Report: our project report, it is a detailed documentation
 * Images: a folder to place images for README.md
